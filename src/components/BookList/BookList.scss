@@ -19,9 +19,10 @@
         height: 250px;
         max-height: 250px;
         vertical-align:top;
+        box-sizing: content-box;
 
         &.selected {
-            background-color: #111;
+            background-color: #282f2f;
         }
 
         &.opened {

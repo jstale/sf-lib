@@ -48,7 +48,7 @@ class GoodReadsService {
 
     getBookDetails(xml) {
         const xmlDoc = this.parser.parseFromString(xml, "text/xml");
-        const averageRating = xmlDoc.getElementsByTagName("average_rating")[0].innerHTML;
+        const averageRating = xmlDoc.getElementsByTagName("average_rating")[0]?.innerHTML;
         const authors = xmlDoc.getElementsByTagName("authors")[0].getElementsByTagName("author");
         const link = xmlDoc.getElementsByTagName("link")[0].innerHTML;
         const description = xmlDoc.getElementsByTagName("description")[0].innerHTML;

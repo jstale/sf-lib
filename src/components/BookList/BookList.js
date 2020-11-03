@@ -10,7 +10,7 @@ import './BookList.scss'
 
 const BookList = () => {
     const [ bookDetailsState, updateBookDetails ]  = useState({ isVisible: false, book: null });
-    const [ bookDetailsPositionState, updateBookDetailsPosition ]  = useState(430);
+    const [ bookDetailsPositionState, setBookDetailsPosition ]  = useState(430);
     const [ booksState, updateBooks ]  = useState([]);
     const [ filteredBooksState, filterBooks ]  = useState([]);
 
@@ -28,8 +28,12 @@ const BookList = () => {
     }
 
     const searchBooks = (e) => {
+        updateBookDetails({isVisible: false, book: null});
+
         const query = e.target.value.toLowerCase();
         let filteredBooks = [...booksState];
+
+        filteredBooks.map(b => { b.isSelected = false; b.isDetailsOpened = false; } );
         sortBooks(filteredBooks);
 
         if(query.length > 2) {
@@ -59,24 +63,19 @@ const BookList = () => {
         filterBooks(filteredBooks);
 
         const newY = selectedBook.ref.current.getBoundingClientRect().y;
-        const oldY = bookDetailsState.book && bookDetailsState.book.ref.current.getBoundingClientRect().y;
+        const oldY = bookDetailsState.book && bookDetailsState.book.ref.current?.getBoundingClientRect().y;
         const scrollY = bookListRef.current.scrollTop;
         const containerY = bookListRef.current.getBoundingClientRect().y;
 
         if(newY !== oldY){
             
-            if(newY > oldY) {
-                let y = scrollY + 260 + (newY - containerY);
-                if(oldY) {
-                    y=y-400;
-                }
+            let y = scrollY + 260 + (newY - containerY);
 
-                updateBookDetailsPosition(y);
+            if(oldY !== undefined && oldY !== null && newY > oldY) {
+                y-=400;
             }
-            else {
-                let y = scrollY + 260 + (newY - containerY);
-                updateBookDetailsPosition(y);
-            }
+
+            setBookDetailsPosition(y);
 
             updateBookDetails({isVisible: false});
             setTimeout(() => {
@@ -97,21 +96,20 @@ const BookList = () => {
             filterBooks(filteredBooks);
         }
 
-        GoodReadsService.getBookById(book.goodreadsId).then((bookDetails) => {
-            let currentDetails = bookDetailsState;
-            currentDetails.metadata = bookDetails;
-            currentDetails.isVisible = true;
-            currentDetails.book = selectedBook;
-            
-            updateBookDetails(currentDetails);
-        });
+        if(book.goodreadsId){
+            GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler.bind(this, selectedBook));
+        } else {
+            GoodReadsService.findBook(book.originalTitle).then(bookDetailsHandler.bind(this, selectedBook));
+        }
     }
 
-    const handleScroll = (event) => {
-        if(bookDetailsState.isVisible) {
-            let oldY = bookDetailsState.book && bookDetailsState.book.ref.current.getBoundingClientRect().y;
-            //updateBookDetailsPosition(oldY + 250);
-        }
+    const bookDetailsHandler = (selectedBook, bookDetails) => {
+        let currentDetails = bookDetailsState;
+        currentDetails.metadata = bookDetails;
+        currentDetails.isVisible = true;
+        currentDetails.book = selectedBook;
+        
+        updateBookDetails(currentDetails);
     }
 
     useEffect(() => {
@@ -129,9 +127,19 @@ const BookList = () => {
     }
     
     return (
-        <div>
-            <input type="text" onChange={searchBooks} ></input> <button onClick={searchBooks}>Search</button>
-            <div className="book-list" ref={bookListRef} onScroll={handleScroll}>
+        <div style={{width:"100%"}}>
+
+            <div class="columns">
+                <div class="column is-4 is-offset-4">
+                    <div class="field">
+                        <div class="control">
+                            <input type="text" onChange={searchBooks} placeholder="Search" className="input" ></input> 
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div className="book-list" ref={bookListRef}>
                 
                 {bookElements}
                 <BookDetails position={bookDetailsPositionState} data={bookDetailsState}></BookDetails>
