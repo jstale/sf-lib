@@ -1,0 +1,55 @@
+.book-list-item {
+        
+    display: inline-block;
+    vertical-align: middle;
+    padding: 3px 5px;
+    font-size: 12px;
+    padding: 12px;
+    margin: 10px;
+    max-width: 150px;
+    min-width: 150px;
+    width: 150px;
+    height: 250px;
+    max-height: 250px;
+    vertical-align:top;
+    box-sizing: content-box;
+
+    &.selected {
+        border-radius: 0.4em;
+        background-color: #282f2f;
+    }
+
+    &.opened {
+        margin-bottom: 400px;
+    }
+
+    img {
+        max-width:130px;
+        max-height:195px;
+        width: auto;
+        height: auto;
+    }
+
+    .cover {
+        display: block;
+        margin: auto;
+        width: 100%;
+        height: 205px;
+        div {
+            margin: auto;
+        }
+    }
+
+    .description {
+        display: block;
+        margin: auto;
+        width: 100%;
+        div {
+            margin: auto;
+        }
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+}

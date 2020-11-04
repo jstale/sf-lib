@@ -7,12 +7,11 @@ class GoodReadsService {
         const id = await this.findBookId(query);
         if(id) {
             return await this.getBookById(id);
-        } else if (query.originalTitle) {
+        } else if (query.title) {
             return await this.findBook({originalTitle: query.originalTitle})
         }
         
-        
-        return null;
+        return {};
     }
 
     async findBookId(query) {

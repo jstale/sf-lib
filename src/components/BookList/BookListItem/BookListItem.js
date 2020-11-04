@@ -1,3 +1,5 @@
+import './BookListItem.scss';
+
 const bookListItem = (props) => {
     return <div ref={props.book.ref} className={`book-list-item ${props.book.isSelected ? "selected" : ""} ${props.book.isDetailsOpened ? "opened" : ""}`} onClick={props.click} >
         <div style={{ display: "block", width: "100%" }}>

@@ -10,7 +10,7 @@ const BookDetails = (props) => {
     }
 
     const style = {
-        top:  props.position
+        top:  props.data.position
     }
 
     return <div className={`book-details ${props.data.isVisible ? "shown" : ""}`} style={style}>
