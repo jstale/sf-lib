@@ -4,22 +4,26 @@ class GoodReadsService {
 
     //https://cors-anywhere.herokuapp.com/
     async findBook(query) {
-        const response = await fetch(`/search/index.xml?q=${query}&key=${this.apiKey}`, {mode:'cors'});
-        const xml = await response.text();
-        const id = this.getBookId(xml);
-
+        const id = await this.findBookId(query);
         if(id) {
             return await this.getBookById(id);
-        } 
-
-
+        } else if (query.originalTitle) {
+            return await this.findBook({originalTitle: query.originalTitle})
+        }
+        
+        
         return null;
     }
 
     async findBookId(query) {
-        const response = await fetch(`/search/index.xml?q=${query}&key=${this.apiKey}`, {mode:'cors'});
+        let search =  query.originalTitle;
+        if(query.title) {
+            search = query.title + " " + query.originalAuthor;
+        }
+        
+        const response = await fetch(`/search/index.xml?q=${search}&key=${this.apiKey}`, {mode:'cors'});
         const xml = await response.text();
-        const id = this.getBookId(xml);
+        const id = this.getBookId(xml, query.title, query.originalTitle);
 
         return id;
     }
@@ -32,10 +36,25 @@ class GoodReadsService {
         return this.getBookDetails(xml);
     }
 
-    getBookId(xml) {
-        
+    getBookId(xml, title, originalTitle) {
         const xmlDoc = this.parser.parseFromString(xml,"text/xml");
-        const book = xmlDoc.getElementsByTagName("work")[0];
+        let books = [...xmlDoc.getElementsByTagName("work")];
+
+        if(title && books.length > 1) {
+            title = title.replace(/,/g, "").trim();
+            books = books.filter(b => {
+                const bestBook = b.getElementsByTagName("best_book")[0];
+                let xmlTitle = bestBook.getElementsByTagName("title")[0].innerHTML;
+                if(xmlTitle.indexOf("(") > 0) {
+                    xmlTitle = xmlTitle.substr(0, xmlTitle.indexOf("("));
+                }
+
+                xmlTitle = xmlTitle.replace(/,/g, "").trim();
+                return title.localeCompare(xmlTitle, 'en', { sensitivity: 'base' }) === 0; 
+            });
+        }
+
+        const book = books[0];
 
         if(book) {
             const bestBook = book.getElementsByTagName("best_book")[0];

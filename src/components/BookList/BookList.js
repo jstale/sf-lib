@@ -20,6 +20,8 @@ const BookList = () => {
         const books = await BookService.getBooks();
         books.map(book => book.ref = React.createRef());
 
+        books.map(book => console.log(book.originalTitle));
+
         let filteredBooks = [...books];
         sortBooks(filteredBooks);
 
@@ -33,7 +35,7 @@ const BookList = () => {
         const query = e.target.value.toLowerCase();
         let filteredBooks = [...booksState];
 
-        filteredBooks.map(b => { b.isSelected = false; b.isDetailsOpened = false; } );
+        filteredBooks.map(b => { b.isSelected = false; b.isDetailsOpened = false; return b; });
         sortBooks(filteredBooks);
 
         if(query.length > 2) {
@@ -58,7 +60,7 @@ const BookList = () => {
         const filteredBooks = [...filteredBooksState];
         const selectedBook = filteredBooks.find(b => book.path === b.path);
 
-        filteredBooks.map(b => { b.isSelected = false; b.isDetailsOpened = false; } );
+        filteredBooks.map(b => { b.isSelected = false; b.isDetailsOpened = false;  return b; });
         selectedBook.isSelected = true;
         filterBooks(filteredBooks);
 
@@ -76,31 +78,39 @@ const BookList = () => {
             }
 
             setBookDetailsPosition(y);
-
             updateBookDetails({isVisible: false});
+
             setTimeout(() => {
                 selectedBook.ref.current.scrollIntoView({
                     behavior: "smooth",
                 });
 
                 setTimeout(() => {
-                    selectedBook.isDetailsOpened = true;
-                    filterBooks(filteredBooks);
-                    updateBookDetails({isVisible: true, book: selectedBook});
-                    
+                    showDetails(selectedBook, filteredBooks);
                 }, 300);
             }, 10);
         } else {
-            updateBookDetails({isVisible: true, book: selectedBook});
-            selectedBook.isDetailsOpened = true;
-            filterBooks(filteredBooks);
+            showDetails(selectedBook, filteredBooks);
         }
 
-        if(book.goodreadsId){
-            GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler.bind(this, selectedBook));
-        } else {
-            GoodReadsService.findBook(book.originalTitle).then(bookDetailsHandler.bind(this, selectedBook));
-        }
+        //if(book.goodreadsId){
+           // GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler.bind(this, selectedBook));
+        //} else {
+
+
+            const originalTitle =  book.originalTitle ?  book.originalTitle.substring(0, book.originalTitle.length - 6) : "";
+
+            
+
+            //query = query.replace("(", "").replace(")", "");
+            GoodReadsService.findBook({title: book.title, originalAuthor: book.originalTitle.split(" ")[0], originalTitle}).then(bookDetailsHandler.bind(this, selectedBook));
+        //}
+    }
+
+    const showDetails = (selectedBook, filteredBooks) => {
+        updateBookDetails({isVisible: true, book: selectedBook});
+        selectedBook.isDetailsOpened = true;
+        filterBooks(filteredBooks);
     }
 
     const bookDetailsHandler = (selectedBook, bookDetails) => {
@@ -122,7 +132,7 @@ const BookList = () => {
     
     if(filteredBooksState) {
         bookElements = filteredBooksState.map((book) =>
-            <BookListItem book={book} click={() => findBook(book)}></BookListItem>
+            <BookListItem key={book.path} book={book} click={() => findBook(book)}></BookListItem>
         );
     }
     
