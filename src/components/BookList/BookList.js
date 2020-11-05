@@ -16,6 +16,7 @@ const BookList = () => {
     const [ booksState, updateBooks ]  = useState([]);
     const [ filteredBooksState, filterBooks ]  = useState([]);
     const bookDetailsStateRef = useRef(bookDetailsState);
+    const bookListRef = React.createRef();
 
     // Keeps the state and ref equal
     function updateBookDetails(newState) {
@@ -23,14 +24,10 @@ const BookList = () => {
         setBookDetails(newState);
     }
 
-
-    const bookListRef = React.createRef();
-    
     async function fetchBooks() {
         const books = await BookService.getBooks();
-        books.map(book => book.ref = React.createRef());
 
-        books.map(book => console.log(book.originalTitle));
+        books.map(book => book.ref = React.createRef());
 
         let filteredBooks = [...books];
         sortBooks(filteredBooks);
@@ -114,18 +111,13 @@ const BookList = () => {
             showDetails();
         }
 
-        //if(book.goodreadsId){
-           // GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler.bind(this, selectedBook));
-        //} else {
-
-
+        if(book.goodreadsId){
+           GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler);
+        } else {
             const originalTitle =  book.originalTitle ?  book.originalTitle.substring(0, book.originalTitle.length - 6) : "";
-
-            
-
             //query = query.replace("(", "").replace(")", "");
             GoodReadsService.findBook({title: book.title, originalAuthor: book.originalTitle.split(" ")[0], originalTitle}).then(bookDetailsHandler);
-        //}
+        }
     }
 
     const showDetails = (position) => {

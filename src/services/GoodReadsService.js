@@ -32,7 +32,7 @@ class GoodReadsService {
     async getBookById(id) {
         const response = await fetch(`/book/show.xml?id=${id}&key=c5PtNYgnHXDRUsVuOrTOg`, {mode:'cors'});
         const xml = await response.text();
-        return this.getBookDetails(xml);
+        return this.getBookDetails(id, xml);
     }
 
     getBookId(xml, title, originalTitle) {
@@ -64,7 +64,7 @@ class GoodReadsService {
         return null;
     }
 
-    getBookDetails(xml) {
+    getBookDetails(id, xml) {
         const xmlDoc = this.parser.parseFromString(xml, "text/xml");
         const averageRating = xmlDoc.getElementsByTagName("average_rating")[0]?.innerHTML;
         const authors = xmlDoc.getElementsByTagName("authors")[0].getElementsByTagName("author");
@@ -73,7 +73,7 @@ class GoodReadsService {
         const numPages = xmlDoc.getElementsByTagName("average_rating")[0].innerHTML;
         const ratingsCount = xmlDoc.getElementsByTagName("work")[0].getElementsByTagName("ratings_count")[0].innerHTML;
             
-        return { description, averageRating, ratingsCount, authors, link, numPages };
+        return { id, description, averageRating, ratingsCount, authors, link, numPages };
     }
 }
 
