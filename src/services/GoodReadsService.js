@@ -67,11 +67,11 @@ class GoodReadsService {
     getBookDetails(id, xml) {
         const xmlDoc = this.parser.parseFromString(xml, "text/xml");
         const averageRating = xmlDoc.getElementsByTagName("average_rating")[0]?.innerHTML;
-        const authors = xmlDoc.getElementsByTagName("authors")[0].getElementsByTagName("author");
-        const link = xmlDoc.getElementsByTagName("link")[0].innerHTML;
-        const description = xmlDoc.getElementsByTagName("description")[0].innerHTML;
-        const numPages = xmlDoc.getElementsByTagName("average_rating")[0].innerHTML;
-        const ratingsCount = xmlDoc.getElementsByTagName("work")[0].getElementsByTagName("ratings_count")[0].innerHTML;
+        const authors = xmlDoc.getElementsByTagName("authors")[0]?.getElementsByTagName("author");
+        const link = xmlDoc.getElementsByTagName("link")[0]?.innerHTML;
+        const description = xmlDoc.getElementsByTagName("description")[0]?.innerHTML;
+        const numPages = xmlDoc.getElementsByTagName("average_rating")[0]?.innerHTML;
+        const ratingsCount = xmlDoc.getElementsByTagName("work")[0]?.getElementsByTagName("ratings_count")[0]?.innerHTML;
             
         return { id, description, averageRating, ratingsCount, authors, link, numPages };
     }

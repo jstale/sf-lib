@@ -1,6 +1,7 @@
 import React from  'react'
 import BookListItem from './BookListItem/BookListItem'
 import BookDetails from './BookDetails/BookDetails'
+import BookSearch from './BookSearch'
 
 import BookService from '../../services/BookService'
 import GoodReadsService from '../../services/GoodReadsService'
@@ -9,9 +10,6 @@ import './BookList.scss'
 
 
 const BookList = () => {
-
-    console.log("RENDERING");
-
     const [ bookDetailsState, setBookDetails ]  = useState({ isVisible: false, book: null });
     const [ booksState, updateBooks ]  = useState([]);
     const [ filteredBooksState, filterBooks ]  = useState([]);
@@ -25,6 +23,7 @@ const BookList = () => {
     }
 
     async function fetchBooks() {
+        console.log("fetchBooks start");
         const books = await BookService.getBooks();
 
         books.map(book => book.ref = React.createRef());
@@ -52,8 +51,6 @@ const BookList = () => {
         }
 
         filterBooks(filteredBooks);
-        
-        console.log(e);
     }
 
     const sortBooks = (books) => {
@@ -96,23 +93,19 @@ const BookList = () => {
         const newY = selectedBook.ref.current.getBoundingClientRect().y;
 
         if(newY !== oldY) {
-            const position = scrollY + 260 + (newY - containerY);
+            let adjust = 260;
+            if(oldY !=null & oldY != undefined && newY > oldY) {
+                adjust -= 400;
+            }
 
-            selectedBook.ref.current.scrollIntoView({
-                behavior: "smooth",
-            });
-
-            //After scroll finishes show details card
-            setTimeout(() => {
-                showDetails(position);
-            }, 300);
-
+            const position = scrollY + adjust + (newY - containerY);
+            showDetails(position);
         } else {
             showDetails();
         }
 
-        if(book.goodreadsId){
-           GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler);
+        if (book.goodreadsId) {
+            GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler);
         } else {
             const originalTitle =  book.originalTitle ?  book.originalTitle.substring(0, book.originalTitle.length - 6) : "";
             //query = query.replace("(", "").replace(")", "");
@@ -135,7 +128,7 @@ const BookList = () => {
     }
 
     useEffect(() => {
-            fetchBooks();
+        fetchBooks();
     }, []);
 
     // ******************************* render ************************************
@@ -149,25 +142,17 @@ const BookList = () => {
     }
     
     return (
-        <div style={{width:"100%"}}>
-
-            <div class="columns">
-                <div class="column is-4 is-offset-4">
-                    <div class="field">
-                        <div class="control">
-                            <input type="text" onChange={searchBooks} placeholder="Search" className="input" ></input> 
-                        </div>
-                    </div>
+        <section className="section">
+            <div style={{width:"100%"}}>
+                <BookSearch onChange={searchBooks} />
+                <div className="book-list" ref={bookListRef}>
+                    
+                    {bookElements}
+                    <BookDetails data={bookDetailsState}></BookDetails>
                 </div>
-
+            
             </div>
-            <div className="book-list" ref={bookListRef}>
-                
-                {bookElements}
-                <BookDetails data={bookDetailsState}></BookDetails>
-            </div>
-        
-        </div>
+        </section>
     )
 }
 

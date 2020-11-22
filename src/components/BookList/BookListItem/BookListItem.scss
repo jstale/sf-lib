@@ -13,15 +13,19 @@
     max-height: 250px;
     vertical-align:top;
     box-sizing: content-box;
+    //margin-bottom: 400px;
 
     &.selected {
         border-radius: 0.4em;
         background-color: #282f2f;
+        //margin-bottom: 400px;
+
+        
     }
 
     &.opened {
         margin-bottom: 400px;
-    }
+     }
 
     img {
         max-width:130px;
