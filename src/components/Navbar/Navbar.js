@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
+
 const Navbar = () => {
     return (
         <nav className="navbar is-warning" role="navigation" aria-label="main navigation">
             <div className="navbar-brand">
             <a className="navbar-item" href="https://bulma.io">
-                <img src="./sflib.svg" style={{height:"28px"}}/>
+                <img src="/sflib.svg" style={{height:"28px"}}/>
             </a>
                 
 
@@ -15,9 +17,9 @@ const Navbar = () => {
             </div>
             <div id="navbarBasicExample" className="navbar-menu">
                 <div className="navbar-start">
-                <a className="navbar-item">
+                <Link className="navbar-item" to="/">
                     Home
-                </a>
+                </Link>
 
                 <a className="navbar-item">
                     Documentation

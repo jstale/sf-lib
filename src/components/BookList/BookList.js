@@ -4,7 +4,6 @@ import BookDetails from './BookDetails/BookDetails'
 import BookSearch from './BookSearch'
 
 import BookService from '../../services/BookService'
-import GoodReadsService from '../../services/GoodReadsService'
 import { useEffect, useState, useRef } from 'react'
 import './BookList.scss'
 
@@ -74,7 +73,6 @@ const BookList = () => {
         let bookDetails = {...bookDetailsState};
         bookDetails.book = selectedBook;
         bookDetails.isVisible = false;
-        bookDetails.metadata = null;
 
         updateBookDetails(bookDetails);
         filterBooks(filteredBooks);
@@ -103,14 +101,6 @@ const BookList = () => {
         } else {
             showDetails();
         }
-
-        if (book.goodreadsId) {
-            GoodReadsService.getBookById(book.goodreadsId).then(bookDetailsHandler);
-        } else {
-            const originalTitle =  book.originalTitle ?  book.originalTitle.substring(0, book.originalTitle.length - 6) : "";
-            //query = query.replace("(", "").replace(")", "");
-            GoodReadsService.findBook({title: book.title, originalAuthor: book.originalTitle.split(" ")[0], originalTitle}).then(bookDetailsHandler);
-        }
     }
 
     const showDetails = (position) => {
@@ -118,13 +108,6 @@ const BookList = () => {
         bookDetails.isVisible = true;
         bookDetails.position = position || bookDetails.position;
         updateBookDetails(bookDetails);
-    }
-
-    const bookDetailsHandler = (bookDetails) => {
-        const currentDetails = {...bookDetailsStateRef.current};
-        currentDetails.metadata = bookDetails;
-        
-        updateBookDetails(currentDetails);
     }
 
     useEffect(() => {

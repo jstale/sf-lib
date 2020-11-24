@@ -4,6 +4,19 @@ class BookService {
         const json = await response.json();
         return json;
     }
+
+    async getBook(path, chapterNum) {
+        chapterNum = chapterNum | 1;
+        const response = await fetch(`/books/${path}/p${chapterNum}.html.json`);
+        const json = await response.json();
+        return json;
+    }
+
+    async getChapter(path, chapterNum) {
+        const response = await fetch(`/books/${path}/p${chapterNum}.html.json`);
+        const json = await response.json();
+        return json;
+    }
 }
 
 export default new BookService();
