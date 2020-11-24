@@ -93,13 +93,13 @@ const BookReader = (props) => {
     let content = null;
 
     const style = {
-        left:  -1695 * (page - 1) + "px"
+        left:  "calc(-" + (100 * (page - 1)) + "%" + " - " + (15 * (page - 1)) + "px)"
     }
 
     if(chapter.index)
     {
         const title = <h2 id="chapterTitle" ref={setChapterStart}>{chapter.title}</h2>
-        let paragraphs = chapter.paragraphs.map((p) => <p>{p}</p>);
+        let paragraphs = chapter.paragraphs.map((p, i) => <p key={i}>{p}</p>);
         paragraphs.push(<div id="chapterEnd" ref={setChapterEnd} onClick={handleNext} style={{ "min-height":"1px", "min-width":"1px"}}></div>);
         content = (<div className="book-reader">
                         <button onClick={handlePrev} className="btn-prev">

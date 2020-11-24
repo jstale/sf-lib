@@ -70,6 +70,8 @@ $primary: $yellow !default;
 // Import only what you need from Bulma
 @import '../node_modules/bulma/bulma.sass';
 @import "../node_modules/bulmaswatch/darkly/overrides";
+$primary: $yellow !default;
+
 .navbar {
   border-radius: 0;
 }
