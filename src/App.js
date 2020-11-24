@@ -12,7 +12,9 @@ const App = () => {
         <div className="App">
             <Layout>
               <Route path="/" exact component={BookList}></Route>
-              <Route path="/books/:id" component={BookReader}></Route>
+              <Route path="/books/:id" exact component={BookReader}></Route>
+              <Route path="/books/:id/chapter/:chapterId" exact component={BookReader}></Route>
+              <Route path="/books/:id/chapter/:chapterId/page/:pageId" exact component={BookReader}></Route>
               
             </Layout>
         </div>

@@ -18,6 +18,7 @@
 
     .btn-next, .btn-prev {
         position: absolute;
+        cursor: pointer;
         top: 100px;
         height: 100%;
         z-index: 100;

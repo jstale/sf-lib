@@ -21,7 +21,7 @@ const BookDetails = (props) => {
 
     const bookDetailsHandler = (bookDetails) => {
         if(bookDetails.description) {
-            bookDetails.description = bookDetails.description.replace("<![CDATA[", "").replace("]]>", "");
+            bookDetails.description = bookDetails.description.replace('<![CDATA[', '').replace(']]>', '');
         }
 
         setMetadata(bookDetails);
@@ -38,9 +38,9 @@ const BookDetails = (props) => {
             <div className="card is-horizontal">
                 <div className="card-image">
                     <div className="cover">
-                        <img src={"images/" + props.data.book.path + ".jpg"} alt="cover"/>
+                        <img src={`images/${props.data.book.path}.jpg`} alt="cover"/>
                     </div>
-                    <Link className="button" to={"books/"+props.data.book.path}>Read</Link>
+                    <Link className="button" to={`books/${props.data.book.path}/chapter/1/page/1`}>Read</Link>
                 </div>
                 <div className="card-content">
                     <div className="media">
