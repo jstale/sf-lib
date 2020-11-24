@@ -101,7 +101,17 @@ const BookReader = (props) => {
         const title = <h2 id="chapterTitle" ref={setChapterStart}>{chapter.title}</h2>
         let paragraphs = chapter.paragraphs.map((p) => <p>{p}</p>);
         paragraphs.push(<div id="chapterEnd" ref={setChapterEnd} onClick={handleNext} style={{ "min-height":"1px", "min-width":"1px"}}></div>);
-        content = (<div className="book-reader " >
+        content = (<div className="book-reader">
+                        <button onClick={handlePrev} className="btn-prev">
+                            <span class="icon is-large">
+                                <i class="fas fa-angle-left"></i>
+                            </span>
+                        </button>
+                        <button onClick={handleNext} className="btn-next">
+                            <span class="icon">
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                        </button>
                         <div className="columnss" style={style}>
                             {title}
                             <div>{paragraphs}</div>
@@ -109,11 +119,7 @@ const BookReader = (props) => {
                     </div>)
     }
 
-
-    return <div>
-        <button onClick={handlePrev}>Prev Page</button>
-        <button onClick={handleNext}>Next Page</button>
-        {content}</div>
+    return <div>{content}</div>;
 }
 
 export default BookReader;
