@@ -74,6 +74,7 @@ const BookReader = (props) => {
         console.log("fetchBook start");
         const chapter = await BookService.getChapter(id, chapterId);
         updateChapter(chapter);
+        updatePage(parseInt(pageId));
         setNextMode(1);
     }
 
@@ -113,7 +114,7 @@ const BookReader = (props) => {
     const handlePrev = async () => {
         if(prevMode === 2) {
             const nextChapter = await BookService.getChapter(id, chapter.index - 1);
-            const lastPage = chapterStats["" + chapter.index] || -1;
+            const lastPage = chapterStats["" + nextChapter.index] || -1;
             if(lastPage) {
                 gotoLastPage(lastPage);
             }
