@@ -1,6 +1,13 @@
-@import '../..//variables';
+@import '../../variables';
+
+@font-face {
+    font-family: "Bookerly";
+    src: url("../../assets/fonts/ember-bookerly/Bookerly-Regular.ttf");
+}
 
 .book-reader {
+    font-family: 'Bookerly', Arial, Helvetica, sans-serif;
+
     p {
         padding: 5px;
         max-width: 50vw;
