@@ -7,7 +7,8 @@ import BookService from '../../services/BookService'
 import { useEffect, useState, useRef } from 'react'
 import './BookList.scss'
 
-
+const DETAILS_STRIP_HEIGHT = 443;
+const DETAILS_STRIP_POSITION_FROM_ITEM_TOP = 260;
 const BookList = () => {
     const [ bookDetailsState, setBookDetails ]  = useState({ isVisible: false, book: null });
     const [ booksState, updateBooks ]  = useState([]);
@@ -91,9 +92,9 @@ const BookList = () => {
         const newY = selectedBook.ref.current.getBoundingClientRect().y;
 
         if(newY !== oldY) {
-            let adjust = 260;
+            let adjust = DETAILS_STRIP_POSITION_FROM_ITEM_TOP;
             if(oldY !=null & oldY != undefined && newY > oldY) {
-                adjust -= 400;
+                adjust -= DETAILS_STRIP_HEIGHT;
             }
 
             const position = scrollY + adjust + (newY - containerY);
