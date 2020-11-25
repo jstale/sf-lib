@@ -7,11 +7,12 @@ const BookReader = (props) => {
     const { id, chapterId, pageId } = useParams();
     const [ chapter, setChapter ] = useState({});
     const [ page, setPage ] = useState(1);
+    const [ lastPage, setLastPage ] = useState(0);
+    const [ isInit, setIsInit ] = useState(null);
     const [ chapterEnd, setChapterEnd] = useState(null);
     const [ chapterStart, setChapterStart] = useState(null);
-    const [ chapterStats, setChapterStats] = useState({});
     const [ nextMode, setNextMode ] = useState(1);//1 - skip page 2 - skip chapter
-    const [ prevMode, setPrevMode ] = useState(2);//1 - skip page 2 - skip chapter
+    const [ prevMode, setPrevMode ] = useState(1);//1 - skip page 2 - skip chapter
     const pageRef = useRef(page);
     const chapterRef = useRef(chapter);
 
@@ -26,29 +27,28 @@ const BookReader = (props) => {
     }
 
     const observer = useRef(new IntersectionObserver(entries => {
-        entries.forEach((entry => {
-            if(entry.target.id === "chapterEnd" && entry.isIntersecting) {
-                setNextMode(2);
-                setPrevMode(1);
-            }
+            const start = entries.find(entry => entry.target.id === "chapterTitle");
+            const end = entries.find(entry => entry.target.id === "chapterEnd");
 
-            if(entry.target.id === "chapterTitle" && entry.isIntersecting) {
+            if(start?.isIntersecting){
                 setNextMode(1);
                 setPrevMode(2);
             }
 
-            if(entry.target.id === "chapterEnd" && !entry.isIntersecting) {
-                if(pageRef.current == -1){
-                    const lastPage = getLastPage(entry.target);
-                    gotoLastPage(lastPage);
+            if(end) {
+                if(!start && end.isIntersecting){
+                    setNextMode(2);
+                    setPrevMode(1);
+                }
+                else {
+                    if(pageRef.current == -1){
+                        const currentX = start?.target.getBoundingClientRect().x || 0;
+                        const newLastPage = getLastPage(end.target.getBoundingClientRect().x, currentX);
+                        gotoLastPage(chapterRef.current.index, newLastPage);
+                    } 
                 }
             }
-        }));
-        //console.log(firstEntry); 
-
-
-        
-    }, { threshold: 1 }));
+    }, { threshold: 0.2 }));
 
     useEffect(() => {
         const chapterEndElement = chapterEnd; // create a copy of the element from state
@@ -71,6 +71,7 @@ const BookReader = (props) => {
     }, [chapterEnd, chapterStart]);
 
     async function fetchBook() {
+        setIsInit(true);
         console.log("fetchBook start");
         const chapter = await BookService.getChapter(id, chapterId);
         updateChapter(chapter);
@@ -78,13 +79,13 @@ const BookReader = (props) => {
         setNextMode(1);
     }
 
-    const getLastPage = (target) => {
-        return Math.trunc(target.getBoundingClientRect().x / window.innerWidth) + 1;
+    const getLastPage = (x, offset) => {
+        return Math.trunc((x - offset) / window.innerWidth) + 1;
     }
 
-    const gotoLastPage = (lastPage) => {
+    const gotoLastPage = (chapt, lastPage) => {
         updatePage(lastPage);
-        props.history.push(`/books/${id}/chapter/${chapterRef.current.index}/page/${lastPage}`);
+        props.history.push(`/books/${id}/chapter/${chapt}/page/${lastPage}`);
         setNextMode(2);
         setPrevMode(1);
     }
@@ -93,12 +94,35 @@ const BookReader = (props) => {
         fetchBook();
     }, []);
 
+
+    useEffect(() => {
+        console.log(chapterStart?.getBoundingClientRect()?.x);
+        console.log(chapterEnd?.getBoundingClientRect()?.x);
+        const endX = chapterEnd?.getBoundingClientRect()?.x || 0;
+        const startX = chapterStart?.getBoundingClientRect()?.x || 0;
+        const newLastPage = getLastPage(endX, startX);
+        if(lastPage === 0){
+            setLastPage(newLastPage);
+        }
+        
+        if(isInit === true) {
+            setIsInit(false);
+            setLastPage(newLastPage + (page === 1 ? 2 : 1));
+        } else if (isInit === null){
+            setTimeout(() => {
+                setIsInit(true);
+                updatePage(0);
+            }, 100);
+        }
+        if(page === 0){
+            updatePage(1);
+        }
+    }, [page]);
+
     const handleNext = async () => {
         if(nextMode === 2) {
             const nextChapter = await BookService.getChapter(id, chapter.index + 1);
-            let chapStats = { ...chapterStats };
-            chapStats["" + chapter.index] = page;
-            setChapterStats(chapStats);
+            setLastPage(0);
             updateChapter(nextChapter);
             updatePage(1);
             props.history.push(`/books/${id}/chapter/${nextChapter.index}/page/1`);
@@ -113,17 +137,11 @@ const BookReader = (props) => {
 
     const handlePrev = async () => {
         if(prevMode === 2) {
+            setLastPage(0);
             const nextChapter = await BookService.getChapter(id, chapter.index - 1);
-            const lastPage = chapterStats["" + nextChapter.index] || -1;
-            if(lastPage) {
-                gotoLastPage(lastPage);
-            }
-            else {
-                updatePage(lastPage);
-            }
-            //props.history.push(`/books/${id}/chapter/${nextChapter.index}/page/-1`);
+            updatePage(-1);
             updateChapter(nextChapter);            
-        } else {
+        } else if(page !== -1) {
             setNextMode(1);
             updatePage(page - 1);
             props.history.push(`/books/${id}/chapter/${chapter.index}/page/${page - 1}`);
@@ -140,7 +158,7 @@ const BookReader = (props) => {
     if(chapter.index)
     {
         const title = <h2 id="chapterTitle" ref={setChapterStart}>{chapter.title}</h2>
-        let paragraphs = chapter.paragraphs.map((p, i) => <p key={i} id={i}>{p}</p>);
+        let paragraphs = chapter.paragraphs.map((p, i) => <p key={"p"+i} id={i}>{p}</p>);
         paragraphs.push(<div id="chapterEnd" ref={setChapterEnd} onClick={handleNext} style={{ "minHeight":"1px", "minWidth":"1px"}}></div>);
         content = (<div className="book-reader">
                         <button onClick={handlePrev} className="btn-prev">
@@ -157,6 +175,7 @@ const BookReader = (props) => {
                             {title}
                             <div>{paragraphs}</div>
                         </div>
+                        <div>Chapter: {chapter.index} Page:{page}/{lastPage}</div>
                     </div>)
     }
 
