@@ -16,7 +16,7 @@ const BookListItem = (props) => {
     return <div ref={props.book.ref} className={`book-list-item ${props.book.isSelected ? "selected" : ""} ${props.isDetailsOpen && props.book.isSelected ? "opened" : ""}`} onClick={props.click} >
         <div style={{ display: "block", width: "100%" }}>
             <div className="cover">
-                <img src={"images/" + props.book.path + ".jpg"} alt={props.book.path}/>
+                <img src={"resources/images/" + props.book.path + ".jpg"} alt={props.book.path}/>
             </div>
             <div className="description">
                 <div>{props.book.title}</div>

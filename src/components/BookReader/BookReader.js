@@ -36,17 +36,22 @@ const BookReader = (props) => {
             }
 
             if(end) {
-                if((!start && end.isIntersecting) || start.isIntersecting && end.isIntersecting){
+                if((!start && end.isIntersecting) || (isInit === false && start && end.isIntersecting)){
                     setNextMode(2);
                     setPrevMode(1);
                 }
-                else {
-                    if(pageRef.current == -1){
-                        const currentX = start?.target.getBoundingClientRect().x || 0;
-                        const newLastPage = getLastPage(end.target.getBoundingClientRect().x, currentX);
-                        gotoLastPage(chapterRef.current.index, newLastPage);
-                    } 
+                else if(start?.isIntersecting && end.isIntersecting) {
+                    setNextMode(2);
+                    setPrevMode(2);
                 }
+                
+                if(pageRef.current == -1){
+                    const currentX = start?.target.getBoundingClientRect().x || 0;
+                    const newLastPage = getLastPage(end.target.getBoundingClientRect().x, currentX);
+                    gotoLastPage(chapterRef.current.index, newLastPage);
+                    setLastPage(newLastPage);
+                } 
+                
             }
     }, { threshold: 0.2 }));
 
@@ -108,7 +113,7 @@ const BookReader = (props) => {
         if(isInit === true) {
             setIsInit(false);
             setLastPage(newLastPage + (page === 1 ? 2 : 1));
-        } else if (isInit === null){
+        } else if (isInit === null && pageId === "1"){
             setTimeout(() => {
                 setIsInit(true);
                 updatePage(0);
@@ -136,12 +141,12 @@ const BookReader = (props) => {
     };
 
     const handlePrev = async () => {
-        if(prevMode === 2) {
+        if(prevMode === 2 && chapter.index > 1) {
             setLastPage(0);
             const nextChapter = await BookService.getChapter(id, chapter.index - 1);
             updatePage(-1);
             updateChapter(nextChapter);            
-        } else if(page !== -1) {
+        } else if(prevMode === 1 && page > 1) {
             setNextMode(1);
             updatePage(page - 1);
             props.history.push(`/books/${id}/chapter/${chapter.index}/page/${page - 1}`);

@@ -38,9 +38,10 @@ const BookDetails = (props) => {
             <div className="card is-horizontal">
                 <div className="card-image">
                     <div className="cover">
-                        <img src={`images/${props.data.book.path}.jpg`} alt="cover"/>
+                        <img src={`resources/images/${props.data.book.path}.jpg`} alt="cover"/>
+                        <Link className="button is-primary" to={`books/${props.data.book.path}/chapter/1/page/1`} style={{width: "100%"}}>Read</Link>
                     </div>
-                    <Link className="button" to={`books/${props.data.book.path}/chapter/1/page/1`}>Read</Link>
+                    
                 </div>
                 <div className="card-content">
                     <div className="media">
