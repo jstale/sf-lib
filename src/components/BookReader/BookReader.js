@@ -36,7 +36,7 @@ const BookReader = (props) => {
             }
 
             if(end) {
-                if(!start && end.isIntersecting){
+                if((!start && end.isIntersecting) || start.isIntersecting && end.isIntersecting){
                     setNextMode(2);
                     setPrevMode(1);
                 }
