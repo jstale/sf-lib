@@ -4,7 +4,8 @@ const http = require('http'),
 
 
 var proxy = httpProxy.createProxyServer({changeOrigin: true});
- 
+const PORT = process.env.PORT || 5000;
+
 const server = http.createServer((request, response) => {
   // You pass two more arguments for config and middleware
   // More details here: https://github.com/vercel/serve-handler#options
@@ -23,6 +24,6 @@ const server = http.createServer((request, response) => {
   });
 })
  
-server.listen(5000, () => {
-  console.log('Running at http://localhost:5000');
+server.listen(PORT, () => {
+  console.log(`Running at http://localhost:${PORT}` );
 });
