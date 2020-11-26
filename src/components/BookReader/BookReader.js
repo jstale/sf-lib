@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router";
+import { Helmet } from 'react-helmet'
 import BookService from "../../services/BookService";
 import "./BookReader.scss"
 
 const BookReader = (props) => {
     const { id, chapterId, pageId } = useParams();
+    const [ book, setBook ] = useState({});
     const [ chapter, setChapter ] = useState({});
     const [ page, setPage ] = useState(1);
     const [ lastPage, setLastPage ] = useState(0);
@@ -14,11 +16,17 @@ const BookReader = (props) => {
     const [ nextMode, setNextMode ] = useState(1);//1 - skip page 2 - skip chapter
     const [ prevMode, setPrevMode ] = useState(1);//1 - skip page 2 - skip chapter
     const pageRef = useRef(page);
+    const isInitRef = useRef(isInit);
     const chapterRef = useRef(chapter);
 
     function updatePage(newPage) {
         pageRef.current = newPage;
         setPage(newPage);
+    }
+
+    function updateIsInit(newIsInit) {
+        isInitRef.current = newIsInit;
+        setIsInit(newIsInit);
     }
 
     function updateChapter(newChapter) {
@@ -30,18 +38,21 @@ const BookReader = (props) => {
             const start = entries.find(entry => entry.target.id === "chapterTitle");
             const end = entries.find(entry => entry.target.id === "chapterEnd");
 
-            if(start?.isIntersecting){
+            if(start?.isIntersecting && !end){
                 setNextMode(1);
                 setPrevMode(2);
             }
 
             if(end) {
-                if((!start && end.isIntersecting) || (isInit === false && start && end.isIntersecting)){
+                if((!start && end.isIntersecting) || (isInitRef.current === false && start && !start.isIntersecting && end.isIntersecting)){
                     setNextMode(2);
                     setPrevMode(1);
                 }
                 else if(start?.isIntersecting && end.isIntersecting) {
                     setNextMode(2);
+                    setPrevMode(2);
+                } else if (start?.isIntersecting && !end.isIntersecting){
+                    setNextMode(1);
                     setPrevMode(2);
                 }
                 
@@ -50,8 +61,7 @@ const BookReader = (props) => {
                     const newLastPage = getLastPage(end.target.getBoundingClientRect().x, currentX);
                     gotoLastPage(chapterRef.current.index, newLastPage);
                     setLastPage(newLastPage);
-                } 
-                
+                }
             }
     }, { threshold: 0.2 }));
 
@@ -76,8 +86,11 @@ const BookReader = (props) => {
     }, [chapterEnd, chapterStart]);
 
     async function fetchBook() {
-        setIsInit(true);
+        updateIsInit(true);
         console.log("fetchBook start");
+        const books = await BookService.getBooks();
+        const book = books.find(b => b.path === id);
+        setBook(book);
         const chapter = await BookService.getChapter(id, chapterId);
         updateChapter(chapter);
         updatePage(parseInt(pageId));
@@ -92,7 +105,11 @@ const BookReader = (props) => {
         updatePage(lastPage);
         props.history.push(`/books/${id}/chapter/${chapt}/page/${lastPage}`);
         setNextMode(2);
-        setPrevMode(1);
+        if(lastPage === 1) {
+            setPrevMode(2);
+        } else {
+            setPrevMode(1);
+        }
     }
 
     useEffect(() => {
@@ -111,11 +128,11 @@ const BookReader = (props) => {
         }
         
         if(isInit === true) {
-            setIsInit(false);
+            updateIsInit(false);
             setLastPage(newLastPage + (page === 1 ? 2 : 1));
         } else if (isInit === null && pageId === "1"){
             setTimeout(() => {
-                setIsInit(true);
+                updateIsInit(true);
                 updatePage(0);
             }, 100);
         }
@@ -184,7 +201,11 @@ const BookReader = (props) => {
                     </div>)
     }
 
-    return <div>{content}</div>;
+    return <div>{content}
+            <Helmet>
+          <title>{ book?.title }</title>
+        </Helmet>
+    </div>;
 }
 
 export default BookReader;
