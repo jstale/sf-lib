@@ -20,19 +20,33 @@ const BookDetails = (props) => {
     });
 
     const bookDetailsHandler = (bookDetails) => {
-        if(bookDetails.description) {
-            bookDetails.description = bookDetails.description.replace('<![CDATA[', '').replace(']]>', '');
-        }
-
+        bookDetails.description = removeCDATA(bookDetails.description)
+        bookDetails.numPages = removeCDATA(bookDetails.numPages)
+        
         setMetadata(bookDetails);
     }
+
+    const removeCDATA = (text) => text?.replace('<![CDATA[', '').replace(']]>', '');
+    
 
     const style = {
         top:  props.data.position
     }
 
+    const originalTitle = props.data.book?.originalTitle;
+    const originalYear = originalTitle?.substring(originalTitle.length - 5, originalTitle.length);
+
     const isLoading = props.data.book && (metadata.id !== props.data.book.goodreadsId);
-    const content = isLoading ? <div className="pageloader is-active"></div> : <div className="description" dangerouslySetInnerHTML={{__html: metadata.description}}></div>
+    const content = isLoading ? <div className="pageloader is-active"></div> : (<div className="description" >
+
+        <div>Original Title: {originalTitle?.substring(0, originalTitle.length - 5)}</div>
+        <div>Year: {originalYear}</div>
+        <div>Pages: {metadata.numPages}</div>
+        <div>Translation: {props.data.book?.translation?.replace('Prevod: ','')} ({props.data.book?.year})</div>
+        <div style={{display: props.data.book?.series ? 'block' : 'none'}}>Series: {props.data.book?.series}</div>
+        <br/>
+        <div dangerouslySetInnerHTML={{__html: metadata.description}}></div>
+    </div>)
 
     return props.data.book ? <div className={`book-details ${props.data.isVisible ? "shown" : ""}`} style={style}>
             <div className="card is-horizontal">
@@ -45,7 +59,7 @@ const BookDetails = (props) => {
                 </div>
                 <div className="card-content">
                     <div className="media">
-                        <div className="media-right">
+                        <div className="media-left">
                             <figure className="image is-48x48">
                                 <p><strong>{metadata.averageRating ? metadata.averageRating : "N/A"}</strong></p>
                                 <img src="goodreads.gif" alt="Placeholder"/>

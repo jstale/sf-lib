@@ -54,7 +54,10 @@ const BookReader = (props) => {
                 } else if (start?.isIntersecting && !end.isIntersecting){
                     setNextMode(1);
                     setPrevMode(2);
+                } else if(!end.isIntersecting) {
+                    setNextMode(1);
                 }
+
                 
                 if(pageRef.current == -1){
                     const currentX = start?.target.getBoundingClientRect().x || 0;
@@ -98,7 +101,7 @@ const BookReader = (props) => {
     }
 
     const getLastPage = (x, offset) => {
-        return Math.trunc((x - offset) / window.innerWidth) + 1;
+        return Math.trunc((x - offset) / (window.innerWidth + 15)) + 1;
     }
 
     const gotoLastPage = (chapt, lastPage) => {
@@ -118,28 +121,23 @@ const BookReader = (props) => {
 
 
     useEffect(() => {
-        console.log(chapterStart?.getBoundingClientRect()?.x);
-        console.log(chapterEnd?.getBoundingClientRect()?.x);
-        const endX = chapterEnd?.getBoundingClientRect()?.x || 0;
-        const startX = chapterStart?.getBoundingClientRect()?.x || 0;
-        const newLastPage = getLastPage(endX, startX);
-        if(lastPage === 0){
+        if(chapterStart && chapterEnd) {
+            const endX = chapterEnd?.getBoundingClientRect()?.x || 0;
+            const startX = chapterStart?.getBoundingClientRect()?.x || 0;
+            let newLastPage = getLastPage(endX, startX);
+
+            if(isInit === true) {
+                updateIsInit(false);
+                newLastPage += 1;
+            }
+
+            if(page > newLastPage) {
+                newLastPage = page;
+            }
+            
             setLastPage(newLastPage);
         }
-        
-        if(isInit === true) {
-            updateIsInit(false);
-            setLastPage(newLastPage + (page === 1 ? 2 : 1));
-        } else if (isInit === null && pageId === "1"){
-            setTimeout(() => {
-                updateIsInit(true);
-                updatePage(0);
-            }, 100);
-        }
-        if(page === 0){
-            updatePage(1);
-        }
-    }, [page]);
+    }, [chapterStart, chapterEnd, page]);
 
     const handleNext = async () => {
         if(nextMode === 2) {
