@@ -1,2 +1,2 @@
 # sf-lib
-Polarisova SF biblioteka
+Polarisova SF biblioteka.
